@@ -1,0 +1,7 @@
+[Unit]
+Description=etcd distributed reliable key-value store
+
+[Service]
+Type=notify
+ExecStart={{ etcd.binary_directory }}/etcd --config-file {{ etcd.config_dir }}/etcd.conf.yaml
+Restart=always

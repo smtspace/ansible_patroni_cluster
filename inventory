@@ -1,0 +1,44 @@
+[etcd_cluster]
+proxy1 ansible_host=10.0.2.21
+proxy2 ansible_host=10.0.2.22
+proxy3 ansible_host=10.0.2.23
+
+
+[haproxy_cluster]
+proxy1 ansible_host=10.0.2.21
+proxy2 ansible_host=10.0.2.22
+proxy3 ansible_host=10.0.2.23
+
+
+[keepalived_cluster]
+proxy1 ansible_host=10.0.2.21
+proxy2 ansible_host=10.0.2.22
+proxy3 ansible_host=10.0.2.23
+
+
+[pgclu1_master]
+pgclu1node1 ansible_host=10.0.2.31
+
+[pgclu1_slaves]
+pgclu1node2 ansible_host=10.0.2.32
+#pgclu1node3 ansible_host=10.0.2.33
+
+[pgclu1_cluster:children]
+pgclu1_master
+pgclu1_slaves
+
+
+[pgclu2_master]
+pgclu2node1 ansible_host=10.0.2.35
+
+[pgclu2_slaves]
+pgclu2node2 ansible_host=10.0.2.36
+#pgclu2node3 ansible_host=10.0.2.37
+
+[pgclu2_cluster:children]
+pgclu2_master
+pgclu2_slaves
+
+
+[all:vars]
+ansible_user='root'

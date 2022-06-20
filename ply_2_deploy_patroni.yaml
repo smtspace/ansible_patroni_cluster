@@ -1,0 +1,3 @@
+---
+- hosts: pgclu1_cluster
+  become: True

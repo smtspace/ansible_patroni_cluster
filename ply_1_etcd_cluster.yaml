@@ -1,0 +1,129 @@
+- hosts: etcd_cluster
+  become: True
+  vars_files:
+    - vars/main.yaml
+
+  roles:
+    - firewall
+    - selinux
+    - sysctl
+
+  tasks:
+    - name: "Create directory for etcd binaries"
+      file:
+        path: "{{ etcd.binary_directory }}"
+        state: directory
+        owner: "{{ etcd.os_user }}"
+        group: "{{ etcd.os_group }}"
+        mode: 0700
+        
+    - name: "Download the tarball into the /tmp directory"
+      get_url:
+        url: "{{ etcd.source_url }}"
+        dest: "{{ etcd.stage_tarball }}"
+        checksum: "{{ etcd.checksum }}"
+        owner: "{{ etcd.os_user }}"
+        group: "{{ etcd.os_group }}"
+        mode: 0600
+
+    - name: "Extract the contents of the tarball"
+      unarchive:
+        src: "{{ etcd.stage_tarball }}"
+        dest: "{{ etcd.binary_directory }}"
+        owner: "{{ etcd.os_user }}"
+        group: "{{ etcd.os_group }}"
+        mode: 0600
+        extra_opts:
+          - --strip-components=1
+        decrypt: True
+        remote_src: True
+
+    - name: "Set permissions for etcd"
+      file:
+        path: "{{ etcd.binary_directory }}/etcd"
+        state: file
+        owner: "{{ etcd.os_user }}"
+        group: "{{ etcd.os_group }}"
+        mode: 0700
+
+    - name: "Set permissions for etcdctl"
+      file:
+        path: "{{ etcd.binary_directory }}/etcdctl"
+        state: file
+        owner: "{{ etcd.os_user }}"
+        group: "{{ etcd.os_group }}"
+        mode: 0700
+
+    - name: "Add {{ etcd.binary_directory }} to the $PATH environment variable"
+      lineinfile:
+        path: /etc/profile
+        line: export PATH="$PATH:{{ etcd.binary_directory }}"
+        state: present
+        create: True
+        insertafter: EOF
+
+    - name: "Set the ETCDCTL_API environment variable to {{ etcd.api_version }}"
+      lineinfile:
+        path: "~/.bash_profile"
+        regexp: "^ETCDCTL_API="
+        line: "export ETCDCTL_API={{ etcd.api_version }}"
+        state: present
+        create: True
+
+    - name: "Set the ENDPOINTS environment variable"
+      lineinfile:
+        path: "~/.bash_profile"
+        regexp: "^ENDPOINTS="
+        line: "export ENDPOINTS={% for host in groups['etcd_cluster'] %}{{ hostvars[host]['ansible_facts'][etcd.net_interface_name]['ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
+        state: present
+        create: True
+
+    - name: "Create a etcd service"
+      template:
+        src: templates/etcd.service.j2
+        dest: /etc/systemd/system/etcd.service
+        owner: "{{ etcd.os_user }}"
+        group: "{{ etcd.os_group }}"
+        mode: 0644
+
+    - name: "Stop the etcd service"
+      service:
+        name: etcd
+        state: stopped
+
+    - name: "Create a data directory"
+      file:
+        path: "{{ etcd.data_dir }}"
+        state: "{{ item }}"
+        owner: "{{ etcd.os_user }}"
+        group: "{{ etcd.os_group }}"
+        mode: 0755
+      with_items:
+        - absent
+        - directory 
+
+    - name: "Create directory for etcd configuration"
+      file:
+        path: "{{ etcd.config_dir }}"
+        state: directory
+        owner: "{{ etcd.os_user }}"
+        group: "{{ etcd.os_group }}"
+        mode: 0755
+
+    - name: "Create configuration file for etcd"
+      template:
+        src: templates/etcd.conf.yaml.j2
+        dest: "{{ etcd.config_dir }}/etcd.conf.yaml"
+        owner: "{{ etcd.os_user }}"
+        group: "{{ etcd.os_group }}"
+        mode: 0600
+
+    - name: "Enable the etcd service"
+      service:
+        name: etcd
+        enabled: yes
+
+    - name: "Start the etcd service"
+      service:
+        name: etcd
+        state: started

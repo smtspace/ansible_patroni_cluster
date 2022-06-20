@@ -1,0 +1,3 @@
+---
+- hosts: keepalived_cluster
+  become: True
