@@ -62,21 +62,30 @@
         create: True
         insertafter: EOF
 
-    - name: "Set the ETCDCTL_API environment variable to {{ etcd.api_version }}"
+    - name: "Add environment variables for Etcd"
       lineinfile:
         path: "~/.bash_profile"
-        regexp: "^ETCDCTL_API="
-        line: "export ETCDCTL_API={{ etcd.api_version }}"
+        regexp: "{{ item.name }}"
+        line: "{{ item.value }}"
         state: present
         create: True
+      loop: "{{ etcd_environment_vars | list }}"
 
-    - name: "Set the ENDPOINTS environment variable"
-      lineinfile:
-        path: "~/.bash_profile"
-        regexp: "^ENDPOINTS="
-        line: "export ENDPOINTS={% for host in groups['etcd_cluster'] %}{{ hostvars[host]['ansible_facts'][etcd.net_interface_name]['ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
-        state: present
-        create: True
+    # - name: "Set the ETCDCTL_API environment variable to {{ etcd.api_version }}"
+    #   lineinfile:
+    #     path: "~/.bash_profile"
+    #     regexp: "^ETCDCTL_API="
+    #     line: "export ETCDCTL_API={{ etcd.api_version }}"
+    #     state: present
+    #     create: True
+
+    # - name: "Set the ENDPOINTS environment variable"
+    #   lineinfile:
+    #     path: "~/.bash_profile"
+    #     regexp: "^ENDPOINTS="
+    #     line: "export ENDPOINTS={% for host in groups['etcd_cluster'] %}{{ hostvars[host]['ansible_facts'][etcd.net_interface_name]['ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
+    #     state: present
+    #     create: True
 
     - name: "Create a etcd service"
       template:

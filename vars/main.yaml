@@ -15,6 +15,10 @@ etcd:
   config_dir: /etc/etcd
   net_interface_name: enp0s3
 
+etcd_environment_vars:
+    - {name: "^ETCDCTL_API=", value: "export ETCDCTL_API={{ etcd.api_version }}"}
+    - {name: "^ENDPOINTS=", value: "export ENDPOINTS={% for host in groups['etcd_cluster'] %}{{ hostvars[host]['ansible_facts'][etcd.net_interface_name]['ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}" }
+
 
 
 sysctl_params_dict:
