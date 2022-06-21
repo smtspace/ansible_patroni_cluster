@@ -1,3 +1,6 @@
 
+# This role uses custom interface name, enp0s3. Before use this role in another project's playbook
+# it is needed to be update manually.
+
 etc_hosts_regexp: "^{{ ansible_facts['enp0s3']['ipv4']['address'] }}"
 etc_hosts_entry: "\n{{ ansible_facts['enp0s3']['ipv4']['address'] }} {{ ansible_facts['nodename'] }} {{ ansible_facts['hostname'] }}\n"
