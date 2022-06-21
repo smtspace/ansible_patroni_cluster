@@ -1,6 +1,11 @@
 ---
 - hosts: pgclu1_cluster
   become: True
+  vars_files:
+    - vars/main.yaml
 
-  debug:
-    msg: "WILL BE IMPLEMENTED SOON"
+  roles: 
+    - firewall
+    - selinux
+    - sysctl
+    - etc_hosts
