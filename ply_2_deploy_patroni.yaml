@@ -30,5 +30,5 @@
       vars:
         ansible_python_interpreter: /usr/bin/python3
       environment:
-        PATH: "{{ ansible_env.PATH }}:{{ postgresql_bin_dir }}:/usr/local/bin:/usr/bin"
+        PATH: "{{ ansible_env.PATH }}:/usr/pgsql-13/bin:/usr/local/bin:/usr/bin"
       loop: "{{ patroni_pip_packages | list }}"
