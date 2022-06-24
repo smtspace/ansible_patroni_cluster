@@ -75,4 +75,4 @@ patroni_packages:
 
 patroni_pip_packages:
   - name: "psycopg2-binary"
-  - name: "patroni[{{ etcd.preferred_in_patroni_version }}]"
+  - name: "patroni[etcd{{ etcd.preferred_in_patroni_version }}]"
