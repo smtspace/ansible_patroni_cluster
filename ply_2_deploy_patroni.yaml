@@ -29,4 +29,6 @@
         virtualenv_python: pip3
       vars:
         ansible_python_interpreter: /usr/bin/python3
+      environment:
+        PATH: "{{ ansible_env.PATH }}:{{ postgresql_bin_dir }}:/usr/local/bin:/usr/bin"
       loop: "{{ patroni_pip_packages | list }}"
