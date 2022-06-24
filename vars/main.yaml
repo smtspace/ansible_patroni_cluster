@@ -66,7 +66,7 @@ patroni_packages:
   - {name: python3-psycopg2, state: "present"}
   - {name: python-psycopg2, state: "present"}
   - {name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm", state: "present"}
-  - {name: entos-release-scl, state: "present"}
+  - {name: centos-release-scl, state: "present"}
   - {name: llvm5.0-devel, state: "present"}
   - {name: llvm-toolset-7-clang, state: "present"}
   - {name: "postgresql{{ postgresql_version }}-devel", state: "present"}
