@@ -14,6 +14,7 @@ etcd:
   data_dir: /var/lib/etcd/{{ inventory_hostname }}.etcd
   config_dir: /etc/etcd
   net_interface_name: enp0s3
+  preferred_in_patroni_version: 3
 
 etcd_environment_vars:
     - {name: "^ETCDCTL_API=", value: "export ETCDCTL_API={{ etcd.api_version }}"}
@@ -71,3 +72,6 @@ patroni_packages:
   - {name: llvm-toolset-7-clang, state: "present"}
   - {name: "postgresql{{ postgresql_version }}-devel", state: "present"}
 
+patroni_pip_packages:
+  - name: "psycopg2-binary"
+  - name: "patroni[{{ etcd.preferred_in_patroni_version }}]"

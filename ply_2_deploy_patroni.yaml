@@ -22,3 +22,9 @@
         disable_gpg_check: yes
         update_cache: no
       loop: "{{ patroni_packages | list }}"
+
+    - name: "Install patroni with pip"
+      ansible.builtin.pip:
+        name: "{{ item.name }}"
+        executable: "/usr/bin/pip3"
+      loop: "{{ patroni_pip_packages | list }}"
