@@ -19,7 +19,7 @@ etcd_environment_vars:
     - {name: "^ETCDCTL_API=", value: "export ETCDCTL_API={{ etcd.api_version }}"}
     - {name: "^ENDPOINTS=", value: "export ENDPOINTS={% for host in groups['etcd_cluster'] %}{{ hostvars[host]['ansible_facts'][etcd.net_interface_name]['ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}" }
 
-
+epel_7_repo: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
 
 sysctl_params_dict:
   - {name: net.ipv4.ip_nonlocal_bind, value: "1" }
@@ -65,7 +65,7 @@ patroni_packages:
   - {name: gcc, state: "present"}
   - {name: python3-psycopg2, state: "present"}
   - {name: python-psycopg2, state: "present"}
-  - {name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm", state: "present"}
+  - {name: "{{ epel_7_repo }}", state: "present"}
   - {name: centos-release-scl, state: "present"}
   - {name: llvm5.0-devel, state: "present"}
   - {name: llvm-toolset-7-clang, state: "present"}
