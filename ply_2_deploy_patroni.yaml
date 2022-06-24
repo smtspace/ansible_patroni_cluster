@@ -27,4 +27,6 @@
       ansible.builtin.pip:
         name: "{{ item.name }}"
         virtualenv_python: pip3
+      vars:
+        ansible_python_interpreter=/usr/bin/python3
       loop: "{{ patroni_pip_packages | list }}"
