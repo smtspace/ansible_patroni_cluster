@@ -47,6 +47,7 @@ postgres_packages:
   - {name: "postgresql{{ postgresql_version }}-server", state: "present"}
   - {name: "postgresql{{ postgresql_version }}-contrib", state: "present"}
   - {name: "postgresql{{ postgresql_version }}-libs", state: "present"}
+  - {name: "postgresql{{ postgresql_version }}-devel", state: "present"}
   - {name: "python-psycopg2", state: "present"}
 
 pg_user:  postgres
@@ -57,3 +58,16 @@ postgres_user_limits:
   - {domain: "{{ pg_user }}", type: "hard", item: "nofile", value: "200000" }
   - {domain: "{{ pg_user }}", type: "soft", item: "memlock", value: "{{ ((ansible_facts['memtotal_mb'] * 1024 * 0.25) + 100) | int }}" }
   - {domain: "{{ pg_user }}", type: "hard", item: "memlock", value: "{{ ((ansible_facts['memtotal_mb'] * 1024 * 0.25) + 100) | int }}" }
+
+patroni_packages:
+  - {name: python3, state: "present"}
+  - {name: python3-pip, state: "present"}
+  - {name: python3-devel, state: "present"}
+  - {name: gcc, state: "present"}
+  - {name: python3-psycopg2, state: "present"}
+  - {name: python-psycopg2, state: "present"}
+  - {name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm, state: "present"}
+  - {name: entos-release-scl, state: "present"}
+  - {name: llvm5.0-devel, state: "present"}
+  - {name: llvm-toolset-7-clang, state: "present"}
+
