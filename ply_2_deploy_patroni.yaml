@@ -26,5 +26,5 @@
     - name: "Install patroni with pip"
       ansible.builtin.pip:
         name: "{{ item.name }}"
-        executable: "/usr/bin/pip3"
+        executable: "/usr/local/bin/pip3"
       loop: "{{ patroni_pip_packages | list }}"
