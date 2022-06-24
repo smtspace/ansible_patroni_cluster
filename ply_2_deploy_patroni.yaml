@@ -9,3 +9,16 @@
     - selinux
     - sysctl
     - etc_hosts
+    - pgdg_repo
+    - postgres_packages
+    - postgres_limits
+
+  tasks:
+
+    - name: "Install packages required for patroni"
+      yum:
+        name: "{{ item.name }}"
+        state: "{{ item.state }}"
+        disable_gpg_check: yes
+        update_cache: no
+      loop: "{{ patroni_packages | list }}"

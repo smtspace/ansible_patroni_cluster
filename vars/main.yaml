@@ -38,3 +38,22 @@ sysctl_params_dict:
   - {name: kernel.sched_migration_cost_ns, value: "5000000" }
   - {name: kernel.sched_autogroup_enabled, value: "0" }
 #  - {name: vm.nr_hugepages, value: "{{ (ansible_facts['memtotal_mb'] * 0.25) / 2 | int }}"}
+
+
+postgres_latest_repo_url: http://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+postgresql_version: '13'
+postgres_packages:
+  - {name: "postgresql{{ postgresql_version }}", state: "present"}
+  - {name: "postgresql{{ postgresql_version }}-server", state: "present"}
+  - {name: "postgresql{{ postgresql_version }}-contrib", state: "present"}
+  - {name: "postgresql{{ postgresql_version }}-libs", state: "present"}
+  - {name: "python-psycopg2", state: "present"}
+
+pg_user:  postgres
+pg_user_group:  postgres
+
+postgres_user_limits:
+  - {domain: "{{ pg_user }}", type: "soft", item: "nofile", value: "65536" }
+  - {domain: "{{ pg_user }}", type: "hard", item: "nofile", value: "200000" }
+  - {domain: "{{ pg_user }}", type: "soft", item: "memlock", value: "{{ ((ansible_facts['memtotal_mb'] * 1024 * 0.25) + 100) | int }}" }
+  - {domain: "{{ pg_user }}", type: "hard", item: "memlock", value: "{{ ((ansible_facts['memtotal_mb'] * 1024 * 0.25) + 100) | int }}" }
