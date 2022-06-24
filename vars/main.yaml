@@ -47,7 +47,6 @@ postgres_packages:
   - {name: "postgresql{{ postgresql_version }}-server", state: "present"}
   - {name: "postgresql{{ postgresql_version }}-contrib", state: "present"}
   - {name: "postgresql{{ postgresql_version }}-libs", state: "present"}
-  - {name: "postgresql{{ postgresql_version }}-devel", state: "present"}
   - {name: "python-psycopg2", state: "present"}
 
 pg_user:  postgres
@@ -70,4 +69,5 @@ patroni_packages:
   - {name: entos-release-scl, state: "present"}
   - {name: llvm5.0-devel, state: "present"}
   - {name: llvm-toolset-7-clang, state: "present"}
+  - {name: "postgresql{{ postgresql_version }}-devel", state: "present"}
 
