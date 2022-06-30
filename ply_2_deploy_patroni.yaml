@@ -12,23 +12,81 @@
     - pgdg_repo
     - postgres_packages
     - postgres_limits
+    - patroni_repo_packages
+    - patroni_pip_packages
 
   tasks:
+    
+    - name: "Create PGDATA directory"
+      file:
+        path: "{{ pg_data_dir }}"
+        state: directory
+        owner: "{{ pg_user }}"
+        group: "{{ pg_user }}"
+        mode: 0700
 
-    - name: "Install packages required for patroni"
-      yum:
-        name: "{{ item.name }}"
-        state: "{{ item.state }}"
-        disable_gpg_check: yes
-        update_cache: no
-      loop: "{{ patroni_packages | list }}"
+    - name: "Edit .bash_profile of postgres user"
+      ansible.builtin.template: 
+        src: templates/.bash_profile.j2
+        dest: /var/lib/pgsql/.bash_profile
+        owner: "{{ pg_user }}"
+        group: "{{ pg_user }}"
+        mode: 0700
 
-    - name: "Install patroni with pip"
-      ansible.builtin.pip:
-        name: "{{ item.name }}"
-        virtualenv_python: pip3
-      vars:
-        ansible_python_interpreter: /usr/bin/python3
-      environment:
-        PATH: "{{ ansible_env.PATH }}:/usr/pgsql-13/bin:/usr/local/bin:/usr/bin"
-      loop: "{{ patroni_pip_packages | list }}"
+    - name: "Create patroni log directory"
+      file:
+        path: "{{ patroni_os_log_dir }}"
+        state: directory
+        owner: "{{ pg_user }}"
+        group: "{{ pg_user }}"
+        mode: 0700
+      tags: patroni_config
+
+    - name: "Create patroni config directory"
+      file:
+        path: "{{ patroni_os_config_dir }}"
+        state: directory
+        owner: "{{ pg_user }}"
+        group: "{{ pg_user }}"
+        mode: 0700
+      tags: patroni_config
+
+    - name: "Create patroni config file"
+      template:
+        src: templates/patroni.yaml.j2
+        dest: "{{ patroni_config_file }}"
+        owner: "{{ pg_user }}"
+        group: "{{ pg_user }}"
+      tags: patroni_config
+        
+    - name: "Create patroni service"
+      template:
+        src: templates/patroni.service.j2
+        dest: "{{ patroni_service_file }}"
+      tags: patroni_config
+
+    - name: "Enable patroni service"
+      service:
+        name: patroni
+        enabled: yes
+      tags: patroni_config
+
+- hosts: pgclu1_master
+  become: True
+  vars_files:
+    - vars/main.yaml
+  tasks:
+    - name: "Start patroni service on master"
+      service:
+        name: patroni
+        state: started
+
+- hosts: pgclu1_slaves
+  become: True
+  vars_files:
+    - vars/main.yaml
+  tasks:
+    - name: "Start patroni service on slaves"
+      service:
+        name: patroni
+        state: started

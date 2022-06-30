@@ -1,0 +1,62 @@
+scope: {{ patroni_scope }}
+namespace: {{ patroni_namespace }}
+name: {{ ansible_hostname }}
+log:
+  dir: {{ patroni_log_dir }}
+  level: {{ patroni_log_level }}
+restapi:
+  listen: {{ hostvars[inventory_hostname]['ansible_facts'][net_interface_name]['ipv4']['address'] }}:8008
+  connect_address: {{ hostvars[inventory_hostname]['ansible_facts'][net_interface_name]['ipv4']['address'] }}:8008
+etcd3:
+  hosts: {% for node in patroni_etcd_nodes %}{{ node.host }}:2379{% if not loop.last %},{% endif %}{% endfor %}
+
+  protocol: http
+bootstrap:
+  dcs:
+    ttl: {{ bootstrap_dcs_ttl }}
+    oop_wait: {{ bootstrap_dcs_oop_wait }}
+    retry_timeout: {{ bootstrap_dcs_retry_timeout }}
+    maximum_lag_on_failover: {{ bootstrap_dcs_maximum_lag_on_failover }}
+    postgresql:
+      use_pg_rewind: {{ bootstrap_dcs_postgresql_use_pg_rewind }}
+      use_slots: {{ bootstrap_dcs_postgresql_use_slots }}
+  initdb:
+    - encoding: {{ bootstrap_initdb_encoding }}
+    - data-checksums
+  pg_hba:
+    - local all all trust
+    - host all all ::/0 md5
+    - host all all 127.0.0.1/32 md5
+{% for node in groups['pgclu1_cluster'] %}    - host all all {{ hostvars[node]['ansible_facts'][net_interface_name]['ipv4']['address'] }}/32 md5
+{% if not loop.last %}{% endif %}{% endfor %}
+    - host replication repuser ::/0 md5
+    - host replication repuser 127.0.0.1/32 md5
+{% for node in groups['pgclu1_cluster'] %}    - host replication repuser {{ hostvars[node]['ansible_facts'][net_interface_name]['ipv4']['address'] }}/32 md5
+{% if not loop.last %}{% endif %}{% endfor %}
+  users:
+    admin:
+      password: admin
+      options:
+        - createrole
+        - createdb
+postgresql:
+  listen: "*:5432"
+  connect_address: {{ hostvars[inventory_hostname]['ansible_facts'][net_interface_name]['ipv4']['address'] }}:5432
+  data_dir: {{ pg_data_dir }}
+  config_dir: {{ pg_data_dir }}
+  bin_dir : {{ pg_binary_dir }}
+#    pgpass: /tmp/pgpass
+  authentication:
+    replication:
+      username: {{ patroni_postgresql_aut_repl_user }}
+      password: {{ patroni_postgresql_aut_repl_pass }}
+    superuser:
+      username: {{ patroni_postgresql_aut_super_user }}
+      password: {{ patroni_postgresql_aut_super_pass }}
+  parameters:
+#        unix_socket_directories: '/tmp'
+tags:
+  nofailover: false
+  noloadbalance: false
+  clonefrom: false
+  nosync: false

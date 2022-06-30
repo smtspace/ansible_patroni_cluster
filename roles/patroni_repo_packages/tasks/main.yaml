@@ -1,0 +1,8 @@
+---
+    - name: "Install packages required for patroni"
+      yum:
+        name: "{{ item.name }}"
+        state: "{{ item.state }}"
+        disable_gpg_check: yes
+        update_cache: no
+      loop: "{{ patroni_packages | list }}"

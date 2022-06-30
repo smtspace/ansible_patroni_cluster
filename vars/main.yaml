@@ -16,6 +16,8 @@ etcd:
   net_interface_name: enp0s3
   preferred_in_patroni_version: 3
 
+net_interface_name: enp0s3
+
 etcd_environment_vars:
     - {name: "^ETCDCTL_API=", value: "export ETCDCTL_API={{ etcd.api_version }}"}
     - {name: "^ENDPOINTS=", value: "export ENDPOINTS={% for host in groups['etcd_cluster'] %}{{ hostvars[host]['ansible_facts'][etcd.net_interface_name]['ipv4']['address'] }}:2379{% if not loop.last %},{% endif %}{% endfor %}" }
@@ -76,3 +78,48 @@ patroni_packages:
 patroni_pip_packages:
   - name: "psycopg2-binary"
   - name: "patroni[etcd{{ etcd.preferred_in_patroni_version }}]"
+
+patroni_restapi_port: 8008
+
+pg_data_dir: /data/pg
+pg_binary_dir: /usr/pgsql-{{ postgresql_version }}/bin
+
+patroni_os_log_dir: /var/log/patroni
+patroni_os_config_dir: /opt/app/patroni/etc
+patroni_config_file: "{{ patroni_os_config_dir }}/patroni.yaml"
+patroni_service_file: /usr/lib/systemd/system/patroni.service
+
+
+patroni_etcd_nodes:
+  - { host: "10.0.2.21", port: "2379" }
+  - { host: "10.0.2.22", port: "2379" }
+  - { host: "10.0.2.23", port: "2379" }
+
+
+patroni_scope: cluster1
+patroni_namespace: /db/
+patroni_name: "{{ ansible_facts['hostname'] }}"
+
+patroni_log_dir: /var/log/patroni
+patroni_log_level: INFO
+
+patroni_restapi_listen: "{{ hostvars[host]['ansible_facts'][net_interface_name]['ipv4']['address']:8008 }}"
+patroni_restapi_connect_address: "{{ hostvars[host]['ansible_facts'][net_interface_name]['ipv4']['address']:8008 }}"
+
+bootstrap_dcs_ttl: 10
+bootstrap_dcs_oop_wait: 10
+bootstrap_dcs_retry_timeout: 10
+bootstrap_dcs_maximum_lag_on_failover: 1048576
+bootstrap_dcs_postgresql_use_pg_rewind: true
+bootstrap_dcs_postgresql_use_slots: true
+
+bootstrap_initdb_encoding: UTF8
+
+patroni_postgresql_aut_repl_user: repuser
+patroni_postgresql_aut_repl_pass: repuser
+patroni_postgresql_aut_super_user: patroni
+patroni_postgresql_aut_super_pass: patroni
+
+
+
+
